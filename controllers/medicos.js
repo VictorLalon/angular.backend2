@@ -6,60 +6,104 @@ const getMedico = async (req, res = response) => {
 
     const medicos = await Medico.find()
         .populate('usuario', 'nombre img')
-        .populate('hospital','nombre img')
+        .populate('hospital', 'nombre img')
 
     res.json({
         ok: true,
         medicos
     });
 }
-    const crearMedico = async (req, res = response) => {
+const crearMedico = async (req, res = response) => {
 
 
 
-        const uid = req.uid;
-        const medicos = new Medico({
-            usuario: uid,
-            ...req.body
+    const uid = req.uid;
+    const medicos = new Medico({
+        usuario: uid,
+        ...req.body
+    });
+    console.log(uid);
+    try {
+
+
+        const medicoDB = await medicos.save();
+
+        res.json({
+            ok: true,
+            medicos: medicoDB
         });
-        console.log(uid);
-        try {
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado... Comuníquese con el Administrador'
+        });
+    }
+}
+const actualizarMedico = async (req, res = response) => {
 
 
-            const medicoDB = await medicos.save();
 
-            res.json({
-                ok: true,
-                medicos: medicoDB
-            });
+    const id = req.params.id;
+    const uid = req.uid;
 
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({
+    try {
+        const medico = await Medico.findById(id);
+        if (!medico) {
+            return res.status(400).json({
                 ok: false,
-                msg: 'Error Inesperado... Comuníquese con el Administrador'
+                msg: 'El Medico no encontrado por Id'
             });
         }
-    }
-    const actualizarMedico = async (req, res = response) => {
 
+        const cambiosMedico = {
+            ...req.body,
+            usuario: uid
+        }
 
-
-        res.json({
-            ok: true,
-            msg: 'actualizar médico'
-        });
-    }
-    const borrarMedico = async (req, res = response) => {
-
-
+        const medicoActualizado = await Medico.findByIdAndUpdate(id, cambiosMedico, { new: true });
 
         res.json({
             ok: true,
-            msg: 'borrar médico'
+            msg: 'Actualizado Correctamente',
+            medico: medicoActualizado
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
         });
     }
+}
+const borrarMedico = async (req, res = response) => {
 
-    module.exports = {
-        getMedico, actualizarMedico, crearMedico, borrarMedico
+    const id = req.params.id;
+    try {
+        const medico = await Medico.findById(id);
+        if (!medico) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El Medico no encontrado por Id'
+            });
+        }
+
+        await Medico.findByIdAndDelete(id);
+        res.json({
+            ok: true,
+            msg: 'Borrado Correctamente',
+            
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error Inesperado'
+        });
     }
+}
+
+module.exports = {
+    getMedico, actualizarMedico, crearMedico, borrarMedico
+}
