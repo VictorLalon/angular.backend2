@@ -187,11 +187,11 @@ const linkPassword = async (req, res = response) => {
             contra = bcrypt.hashSync(newpassword, salt);
 
         
-           await  Usuario.useFindAndModify(id, { password: contra, new: true });
+           await  Usuario.findByIdAndUpdate(id, { password: contra, new: true });
 
             res.json({
                 ok: true,
-                msg: 'Contraseña cambiada'
+                msg: 'Contraseña Cambiada'
             })
 
 
