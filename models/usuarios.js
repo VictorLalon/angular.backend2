@@ -28,7 +28,10 @@ const UsuarioSchema = Schema ({
         type:Boolean,
         default:false
     },
-
+    resetlink:{
+        data:String,
+        default:''
+    }
 });
 
 UsuarioSchema.method ('toJSON',function(){

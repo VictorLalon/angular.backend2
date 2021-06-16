@@ -5,16 +5,20 @@ const { response, json } = require('express');
 const bcrypt = require('bcryptjs');
 const Usuario = require('../models/usuarios');
 const { generarJwt } = require("../helpers/jwt");
+const mailgun = require("mailgun-js");
+const DOMAIN = 'sandboxd540ac84baba48b28f1698b8ade86765.mailgun.org';
+const mg = mailgun({ apiKey: process.env.MAILGUN_APIKEY, domain: DOMAIN });
+
 
 const getUsuarios = async (req, res) => {
 
     const desde = Number(req.query.desde) || 0;
 
-   const [usuarios,total] = await Promise.all([
+    const [usuarios, total] = await Promise.all([
         Usuario
-        .find({}, 'nombre email role google img')
-        .skip(desde)
-        .limit(5),
+            .find({}, 'nombre email role google img')
+            .skip(desde)
+            .limit(5),
         Usuario.countDocuments()
     ]);
 
@@ -39,6 +43,12 @@ const crearUsuario = async (req, res = response) => {
                 msg: 'El correo ya está Registrado'
             });
         }
+        const data = {
+            from: 'noreply@hello.com',
+            to: email,
+            subject: 'Cuenta Activacion Link',
+            text: 'Usted esta Registrado Correctamente !'
+        };
 
         const usuarios = new Usuario(req.body);
 
@@ -135,6 +145,8 @@ const borrarUusario = async (req, res = response) => {
             msg: 'Comuniquese con el administrador'
         });
     }
+
+    
 }
 
 module.exports = {
